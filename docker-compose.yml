@@ -1,6 +1,6 @@
 services:
   rag-model:
-    image: nvidia/cuda
+    image: nvidia/cuda:12.6.1-devel-ubi8
     container_name: rag_model_service
     runtime: nvidia
     environment:
