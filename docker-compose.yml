@@ -11,8 +11,8 @@ services:
     working_dir: /app
     command: >
       /bin/bash -c "
-      apt-get update && 
-      apt-get install -y python3 python3-pip &&
+      dnf update -y &&
+      dnf install -y python3 python3-pip &&
       pip3 install -Uq ragatouille &&
       pip3 install -Uq einops flash_attn --no-build-isolation &&
       pip3 install -Uq faiss-gpu &&
