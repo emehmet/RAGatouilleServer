@@ -26,6 +26,7 @@ services:
           devices:
             - driver: nvidia
               capabilities: [gpu]
+    restart: unless-stopped # Konteynerin durması durumunda yeniden başlatılması için
 
   index-server:
     image: tiangolo/uvicorn-gunicorn-fastapi:python3.9
