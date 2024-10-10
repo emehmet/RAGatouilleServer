@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  rag-model:
+    image: nvidia/cuda:11.7.0-cudnn8-runtime-ubuntu20.04
+    container_name: rag_model_service
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      /bin/bash -c "
+      pip install -Uq ragatouille &&
+      pip install -Uq einops flash_attn --no-build-isolation &&
+      pip install -Uq faiss-gpu &&
+      pip install -Uq colbert-ai &&
+      pip3 uninstall --yes torch torchaudio torchvision torchtext torchdata &&
+      pip3 install torch torchaudio torchvision torchtext torchdata &&
+      python3 app.py"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+
+  index-server:
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.9
+    container_name: rag_index_server
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - '7701:80'
+    depends_on:
+      - rag-model
+    environment:
+      - RAG_MODEL_SERVICE_HOST=rag_model_service
+    command: >
+      uvicorn app:index_app --host 0.0.0.0 --port 80
+
+  search-server:
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.9
+    container_name: rag_search_server
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - '7702:80'
+    depends_on:
+      - rag-model
+    environment:
+      - RAG_MODEL_SERVICE_HOST=rag_model_service
+    command: >
+      uvicorn app:search_app --host 0.0.0.0 --port 80
+
