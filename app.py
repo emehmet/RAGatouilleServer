@@ -27,7 +27,7 @@ async def index_document(index_request: IndexRequest):
         index_name=index_request.index_name,
         max_document_length=index_request.max_document_length,
         split_documents=index_request.split_documents,
-        use_faiss=True
+        use_faiss=False
     )
     return {"status": "indexed", "document_id": index_request.document_id}
 
